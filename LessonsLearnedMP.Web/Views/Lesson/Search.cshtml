@@ -1,0 +1,725 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js" type="text/javascript"></script>
+}   
+
+@model SearchViewModel
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.ViewData
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.Helpers
+@using Suncor.LessonsLearnedMP.Data
+
+
+@Html.Script(Enumerations.Css.JquerySelectMenu)
+@Html.Script(Enumerations.Css.JqueryMultiselect)
+@Html.Script(Enumerations.JavaScript.JquerySelectMenu)
+@Html.Script(Enumerations.JavaScript.LessonsLearnedSearch)
+@Html.Script(Enumerations.JavaScript.JqueryMultiselect)
+
+@{
+    var applicationContext = new ApplicationContext(Html.GetDistributedCache());
+    var userSessionContext = new UserSessionContext(this.ViewContext.HttpContext);
+    var userCookieContext = new UserCookieContext(this.ViewContext.HttpContext);
+
+    bool admin = userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator;
+
+    var lessonStatuses = applicationContext.LessonStatuses.ToDisplayList(admin);
+    var submittedByUsers = ((List<RoleUser>)ViewBag.SubmittedByUsers).SubmittedUsersToDisplayList();
+    var projects = applicationContext.Projects.ToDisplayList(admin, false);
+    var coordinators = applicationContext.Coordinators.ToDisplayList(admin, true);
+    var locations = applicationContext.Locations.ToDisplayList(admin);
+    var impactBenefitRanges = applicationContext.ImpactBenefitRanges.ToDisplayList(admin);
+    var costImpacts = applicationContext.CostImpacts.ToDisplayList(admin);
+    var riskRankings = applicationContext.RiskRankings.ToDisplayList(admin);
+    var credibilityChecklists = applicationContext.CredibilityChecklists.ToDisplayList(admin);
+    var disciplines = applicationContext.Disciplines.ToDisplayList(admin, false);
+    var lessonTypesValid = applicationContext.LessonTypesValid.ToDisplayList(admin);
+    var lessonTypesInvalid = applicationContext.LessonTypesInvalid.ToDisplayList(admin);
+    var themes = applicationContext.Themes.ToDisplayList(admin);
+    var phases = applicationContext.Phases.ToDisplayList(admin, false);
+    var classifications = applicationContext.Classifications.ToDisplayList(admin, false);
+
+    int longFormHeight = userCookieContext.LongFormViewHeight;
+}
+
+<script type="text/javascript">
+    var themeOtherValue = @applicationContext.Themes.Where(x => x.System && x.Id != 0).FirstOrDefault().Id;
+</script>
+
+<script type="text/javascript">
+    $(function () {
+
+        $('* :submit').click(function () {
+            $('#SystemId').val($('#System').val());
+            $('#ReportType').val($(this).attr('name'));
+            $('#ProjectContractorId').val($('#ProjectContractor').val());
+        });
+
+//        $('#StatusSelect').click(function () {
+//            $("#SelectedStatus option").attr("selected", "selected");
+//            return false;
+//        });
+
+//        $('#StatusDeselect').click(function () {
+//            $("#SelectedStatus option").removeAttr("selected");
+//            return false;
+//        });
+
+//        $('#IssuedForSelect').click(function () {
+//            $("#SelectedIssuedFor option").attr("selected", "selected");
+//            return false;
+//        });
+
+//        $('#IssuedForDeselect').click(function () {
+//            $("#SelectedIssuedFor option").removeAttr("selected");
+//            return false;
+        //        });
+
+     
+    });
+
+    $(function () {
+        $("#SelectedStatus").multiselect();
+        $("#SelectedSubmittedUser").multiselect();
+        $("#SelectedProjectId").multiselect();
+        $("#SelectedClassificationId").multiselect();
+        $("#SelectedCoordinator").multiselect();
+        $("#SelectedLocationId").multiselect();
+        $("#SelectedImpactBenefitRangeId").multiselect();
+        $("#SelectedCostImpactId").multiselect();
+        $("#SelectedRiskRankingId").multiselect();
+        $("#SelectedCredibilityChecklistId").multiselect();
+        $("#SelectedDisciplineId").multiselect();
+        $("#SelectedPhaseId").multiselect();
+        $("#SelectedThemeId").multiselect();
+        $("#SelectedLessonTypeValidId").multiselect({ id: "SelectedLessonTypeValidId-button" });
+        $("#SelectedLessonTypeInvalidId").multiselect();
+        $("#SelectedClosedQuarter").multiselect();
+
+        encodeURIComponent("#SelectedProjectId");
+    });
+
+
+</script>
+
+<div id="LongFormView" style="max-height:@(longFormHeight)px">
+    <div style="position:relative">
+
+        <div id="SearchLessonContent" class="dark-theme">
+    @Html.HiddenFor(x => x.AdvancedSearch)
+    @Html.HiddenFor(x => x.ShowOnlyOwnedLessons)
+
+    <div id="SectionOne">
+
+        <div class="section ui-widget ui-widget-content ui-corner-all">
+            <div class="more search clickable">
+                <div class="more-label ui-state-highlight ui-corner-all">
+                    <span class="more-label-button web-sprite sprite-plus-button float-left"></span>
+                    <span class="more-label-text">Advanced...</span>
+                </div>
+            </div>
+
+            <div class="section-item first-row first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.Keyword)'>
+                        <span class="float-left">Keyword</span>
+                    </label>
+                </div>
+                <div class="html-control keyword">
+                    @Html.TextBoxFor(x => x.Keyword, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item first-row">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.LessonId)'>
+                        <span class="float-left">Record Number</span>
+                    </label>
+                </div>
+                <div class="html-control record-number">
+                    @Html.TextBoxFor(x => x.LessonId, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="html-control ddl">
+          @*  <select id="SelectedStatus" name="SelectedStatus" multiple="multiple" class="multiSelect" >
+                @foreach (var itm in lessonStatuses)
+                {
+                    <option value="@itm.Id" >@itm.Name</option>
+                }
+            </select>*@
+
+            @Html.ListBoxFor(x => x.SelectedStatus, new MultiSelectList(lessonStatuses, "Id", "Name", Model.SelectedStatus), new { @class = "multiSelect" })
+
+            </div>
+
+            <div class="clear"></div>
+
+            <ul>
+                <li>@Html.ValidationMessageFor(x => x.Keyword)</li>        
+                <li>@Html.ValidationMessageFor(x => x.LessonId)</li>
+                <li>@Html.ValidationMessageFor(x => x.Status)</li>
+                @*<li>@Html.ValidationMessageFor(x => x.SelectedStatus)</li>*@
+            </ul>
+            
+        </div>
+    </div>
+
+    <div id="SectionTwo">
+    
+        <div class="section ui-widget ui-widget-content ui-corner-all">
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.SubmittedUser)'>
+                        <span class="float-left">Submitted By</span>
+                    </label>
+                </div>
+                <div class="html-control ddl">
+                   @* @Html.DropDownListFor(x => x.SubmittedUser, new SelectList(submittedByUsers, "Name", "Name", Model.SubmittedUser), "")*@
+                    @*<select id="SelectedSubmittedUser" name="SelectedSubmittedUser" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in submittedByUsers)
+                        {
+                            <option value="@itm.Name" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedSubmittedUser, new MultiSelectList(submittedByUsers, "Name", "Name", Model.SelectedSubmittedUser), new { @class = "multiSelect" })
+                </div>
+            </div>
+
+            <div class="section-item last-item">
+                <div class="label date-range">
+                    <label for='@Html.GetControlId(x => x.SubmittedDateBegin)'>
+                        <span class="float-left">Date Submitted</span>
+                    </label>
+                </div>
+                <div class="html-control date-range">
+                    <span class="range-label">From</span>@Html.EditorFor(x => x.SubmittedDateBegin)<span data-controlId="@Html.GetControlId(x => x.SubmittedDateBegin)" class="web-sprite sprite-calendar clickable"></span>
+                    <span class="range-label">To</span>@Html.EditorFor(x => x.SubmittedDateEnd)<span data-controlId="@Html.GetControlId(x => x.SubmittedDateEnd)" class="web-sprite sprite-calendar clickable"></span>
+                </div>
+            </div>
+
+            <div class="clear"></div>
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.ProjectId)'>
+                        <span class="float-left">Project Name</span>
+                    </label>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.ProjectId, new SelectList(projects, "Id", "Name", Model.ProjectId), "")*@
+                   @*  <select id="SelectedProjectId" name="SelectedProjectId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in projects)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    
+                    @Html.ListBoxFor(x => x.SelectedProjectId, new MultiSelectList(projects, "Id", "Name", Model.SelectedProjectId), new { @class = "multiSelect" })
+                </div>
+            </div>
+
+            <div class="section-item last-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.ClassificationId)'>
+                        <span class="float-left">Project Classification</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                   @* @Html.DropDownListFor(x => x.ClassificationId, new SelectList(classifications, "Id", "Name", Model.ClassificationId), "")*@
+                   @* <select id="SelectedClassificationId" name="SelectedClassificationId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in classifications)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+
+                    @Html.ListBoxFor(x => x.SelectedClassificationId, new MultiSelectList(classifications, "Id", "Name", Model.SelectedClassificationId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.ClassificationId)
+                </div>
+            </div>
+
+            <div class="clear"></div>
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.Coordinator)'>
+                        <span class="float-left">LL Coordinator</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                   @* @Html.DropDownListFor(x => x.Coordinator, new SelectList(coordinators, "Name", "Name", Model.Coordinator), "")*@
+                 @*     <select id="SelectedCoordinator" name="SelectedCoordinator" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in coordinators)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedCoordinator, new MultiSelectList(coordinators, "Name", "Name", Model.SelectedCoordinator), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.Coordinator)
+                </div>
+            </div>
+
+            <div class="section-item last-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.LocationId)'>
+                        <span class="float-left">Location</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.LocationId, new SelectList(locations, "Id", "Name", Model.LocationId), "")*@
+                 @*     <select id="SelectedLocationId" name="SelectedLocationId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in locations)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedLocationId, new MultiSelectList(locations, "Id", "Name", Model.SelectedLocationId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.LocationId)
+                </div>
+            </div>
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.ImpactBenefitRangeId)'>
+                        <span class="float-left">Benefit Range</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.ImpactBenefitRangeId, new SelectList(impactBenefitRanges, "Id", "Name", Model.ImpactBenefitRangeId), "")*@
+                   @*  <select id="SelectedImpactBenefitRangeId" name="SelectedImpactBenefitRangeId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in impactBenefitRanges)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedImpactBenefitRangeId, new MultiSelectList(impactBenefitRanges, "Id", "Name", Model.SelectedImpactBenefitRangeId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.ImpactBenefitRangeId)
+                </div>
+            </div>
+
+            <div class="section-item last-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.CostImpactId)'>
+                        <span class="float-left">Cost Impact</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.CostImpactId, new SelectList(costImpacts, "Id", "Name", Model.CostImpactId), "")*@
+                    @* <select id="SelectedCostImpactId" name="SelectedCostImpactId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in costImpacts)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedCostImpactId, new MultiSelectList(costImpacts, "Id", "Name", Model.SelectedCostImpactId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.CostImpactId)
+                </div>
+            </div>
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.RiskRankingId)'>
+                        <span class="float-left">Risk Ranking</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.RiskRankingId, new SelectList(riskRankings, "Id", "Name", Model.RiskRankingId), "")*@
+                   @*  <select id="SelectedRiskRankingId" name="SelectedRiskRankingId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in riskRankings)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedRiskRankingId, new MultiSelectList(riskRankings, "Id", "Name", Model.SelectedRiskRankingId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.RiskRankingId)
+                </div>
+            </div>
+
+            <div class="section-item last-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.CredibilityChecklistId)'>
+                        <span class="float-left">Credibility Checklist</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.CredibilityChecklistId, new SelectList(credibilityChecklists, "Id", "Name", Model.CredibilityChecklistId), "")*@
+                   @*  <select id="SelectedCredibilityChecklistId" name="SelectedCredibilityChecklistId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in credibilityChecklists)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedCredibilityChecklistId, new MultiSelectList(credibilityChecklists, "Id", "Name", Model.SelectedCredibilityChecklistId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.CredibilityChecklistId)
+                </div>
+            </div>
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.DisciplineId)'>
+                        <span class="float-left">Responsible Discipline</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.DisciplineId, new SelectList(disciplines, "Id", "Name", Model.DisciplineId), "")*@
+              @*       <select id="SelectedDisciplineId" name="SelectedDisciplineId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in disciplines)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedDisciplineId, new MultiSelectList(disciplines, "Id", "Name", Model.SelectedDisciplineId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.DisciplineId)
+                </div>
+            </div>
+
+
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.PhaseId)'>
+                        <span class="float-left">Project Phase</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.PhaseId, new SelectList(phases, "Id", "Name", Model.PhaseId), "")*@
+                    @* <select id="SelectedPhaseId" name="SelectedPhaseId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in phases)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedPhaseId, new MultiSelectList(phases, "Id", "Name", Model.SelectedPhaseId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.PhaseId)
+                </div>
+            </div>
+
+            <div class="section-item first-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.ThemeId)'>
+                        <span class="float-left">Lesson Theme</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.ThemeId, new SelectList(themes, "Id", "Name", Model.ThemeId), "")*@
+                    @*<select id="SelectedThemeId" name="SelectedThemeId" multiple="multiple" class="multiSelect" >
+                        @foreach (var itm in themes)
+                        {
+                            <option value="@itm.Id" >@itm.Name</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedThemeId, new MultiSelectList(themes, "Id", "Name", Model.SelectedThemeId), new { @class = "multiSelect" })
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.ThemeId)
+                </div>
+            </div>
+
+            <div id="ThemeDescriptionTarget" class="section-item last-item @(Model.ThemeId == applicationContext.Themes.Where(x => x.System).FirstOrDefault().Id ? "" : "display-none")">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.ThemeDescription)'>
+                        <span class="float-left">Theme Description</span>
+                    </label>
+                </div>
+                <div class="html-control" style="width:268px;">
+                    @Html.TextBoxFor(x => x.ThemeDescription, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="clear"></div>
+
+            <ul>
+                <li>@Html.ValidationMessageFor(x => x.SubmittedUser)</li>
+                <li>@Html.ValidationMessageFor(x => x.SubmittedDateBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.SubmittedDateEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.ProjectId)</li>
+                <li>@Html.ValidationMessageFor(x => x.SessionDateBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.SessionDateEnd)</li>
+            </ul>
+
+        </div>
+    </div><!--End SectionTwo-->
+
+    <div id="SectionThree" class="more-details @(Model.AdvancedSearch ? "" : "display-none")">
+        <div class="section ui-widget ui-widget-content ui-corner-all">
+
+        <div class="left-side">
+
+
+                        <div class="section-item last-item">
+                <div class="label date-range">
+                    <label for='@Html.GetControlId(x => x.SessionDateBegin)'>
+                        <span class="float-left">Session Date</span>
+                    </label>
+                </div>
+                <div class="html-control date-range">
+                    <span class="range-label">From</span>@Html.EditorFor(x => x.SessionDateBegin)<span data-controlId="@Html.GetControlId(x => x.SessionDateBegin)" class="web-sprite sprite-calendar clickable"></span>
+                    <span class="range-label">To</span>@Html.EditorFor(x => x.SessionDateEnd)<span data-controlId="@Html.GetControlId(x => x.SessionDateEnd)" class="web-sprite sprite-calendar clickable"></span>
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.Title)'>
+                        <span class="float-left">Title</span>
+                    </label>
+                </div>
+                <div class="html-control text">
+                    @Html.TextBoxFor(x => x.Title, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.CausalFactors)'>
+                        <span class="float-left">Causal Factors</span>
+                    </label>
+                </div>
+                <div class="html-control text">
+                    @Html.TextBoxFor(x => x.CausalFactors, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+
+
+            <div class="section-item">
+                <div class="label date-range">
+                    <label for='@Html.GetControlId(x => x.LastSentToBpoDateBegin)'>
+                        <span class="float-left">Last Sent to BPO</span>
+                    </label>
+                </div>
+                <div class="html-control date-range">
+                    <span class="range-label">From</span>@Html.EditorFor(x => x.LastSentToBpoDateBegin)<span data-controlId="@Html.GetControlId(x => x.LastSentToBpoDateBegin)" class="web-sprite sprite-calendar clickable"></span>
+                    <span class="range-label">To</span>@Html.EditorFor(x => x.LastSentToBpoDateEnd)<span data-controlId="@Html.GetControlId(x => x.LastSentToBpoDateEnd)" class="web-sprite sprite-calendar clickable"></span>
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label date-range">
+                    <label for='@Html.GetControlId(x => x.ClosedDateBegin)'>
+                        <span class="float-left">Date Closed</span>
+                    </label>
+                </div>
+                <div class="html-control date-range">
+                    <span class="range-label">From</span>@Html.EditorFor(x => x.ClosedDateBegin)<span data-controlId="@Html.GetControlId(x => x.ClosedDateBegin)" class="web-sprite sprite-calendar clickable"></span>
+                    <span class="range-label">To</span>@Html.EditorFor(x => x.ClosedDateEnd)<span data-controlId="@Html.GetControlId(x => x.ClosedDateEnd)" class="web-sprite sprite-calendar clickable"></span>
+                </div>
+            </div>
+
+            <div class="section-item text-range">
+                <div class="label text-range">
+                    <label for='@Html.GetControlId(x => x.ResponseTurnaroundBegin)'>
+                        <span class="float-left">Response Turnaround (Closed)</span>
+                    </label>
+                </div>
+                <div class="html-control text-range">
+                    <span class="range-label">From</span>@Html.TextBoxFor(x => x.ResponseTurnaroundBegin, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                    <span class="range-label">To</span>@Html.TextBoxFor(x => x.ResponseTurnaroundEnd, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item text-range">
+                <div class="label text-range">
+                    <label for='@Html.GetControlId(x => x.TimesSentForClarificationBegin)'>
+                        <span class="float-left">No. of Times Sent for Clarification</span>
+                    </label>
+                </div>
+                <div class="html-control text-range">
+                    <span class="range-label">From</span>@Html.TextBoxFor(x => x.TimesSentForClarificationBegin, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                    <span class="range-label">To</span>@Html.TextBoxFor(x => x.TimesSentForClarificationEnd, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item text-range">
+                <div class="label text-range">
+                    <label for='@Html.GetControlId(x => x.TimesBpoTransferedBegin)'>
+                        <span class="float-left">No. of BPO Transfers</span>
+                    </label>
+                </div>
+                <div class="html-control text-range">
+                    <span class="range-label">From</span>@Html.TextBoxFor(x => x.TimesBpoTransferedBegin, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                    <span class="range-label">To</span>@Html.TextBoxFor(x => x.TimesBpoTransferedEnd, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+        </div><!--End left-side-->
+
+        <div class="right-side">
+        
+            <div class="section-item lesson-type border">
+                <div class="label lesson-type border" style="width:48px;">
+                    <label for='@Html.GetControlId(x => x.LessonTypeValidId)'>
+                        <span class="float-left">Lesson Type</span>
+                    </label>
+                    <div class="clear"></div>
+                </div>
+                <div class="html-control ddl lesson-type border" style="width:380px;">
+                  <span class="range-label">Valid</span>@Html.RadioButtonFor(model => model.IsLessonTypeValidSelected, true, new { @class = "radio", style = "width:20px !important;float:left;" })
+
+                @{   
+                    if(userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.BPO
+                        || userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator)
+                    {
+                       <span class="range-label">Invalid</span>@Html.RadioButtonFor(model => model.IsLessonTypeValidSelected, false, new { @class = "radio", style = "width:20px !important;float:left;" })
+                    }
+                  }
+
+                    <div style="float:left; width:217px;">
+                    @*    @Html.DropDownListFor(x => x.LessonTypeValidId, new SelectList(lessonTypesValid, "Id", "Name", Model.LessonTypeValidId), "")
+                        @Html.DropDownListFor(x => x.LessonTypeInvalidId, new SelectList(lessonTypesInvalid, "Id", "Name", Model.LessonTypeInvalidId), "")*@
+                          <div id="SelectedLessonTypeValidIdDisplay">
+                             @* <select id="SelectedLessonTypeValidId" name="SelectedLessonTypeValidId" multiple="multiple" class="multiSelect" >
+                                @foreach (var itm in lessonTypesValid)
+                                {
+                                    <option value="@itm.Id" >@itm.Name</option>
+                                }
+                             </select>*@
+                             @Html.ListBoxFor(x => x.SelectedLessonTypeValidId, new MultiSelectList(lessonTypesValid, "Id", "Name", Model.SelectedLessonTypeValidId), new { @class = "multiSelect" })
+                         </div>
+                         <div id="SelectedLessonTypeInvalidIdDisplay">
+                            @* <select id="SelectedLessonTypeInvalidId" name="SelectedLessonTypeInvalidId" multiple="multiple" class="multiSelect" >
+                                @foreach (var itm in lessonTypesInvalid)
+                                {
+                                    <option value="@itm.Id" >@itm.Name</option>
+                                }
+                            </select>*@
+                            @Html.ListBoxFor(x => x.SelectedLessonTypeInvalidId, new MultiSelectList(lessonTypesInvalid, "Id", "Name", Model.SelectedLessonTypeInvalidId), new { @class = "multiSelect" })
+                        </div>
+                    </div>
+
+                    <div class="clear"></div>
+                    @Html.ValidationMessageFor(x => x.LessonTypeValidId)
+                    @Html.ValidationMessageFor(x => x.LessonTypeInvalidId)
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.Description)'>
+                        <span class="float-left">Description</span>
+                    </label>
+                </div>
+                <div class="html-control text">
+                    @Html.TextBoxFor(x => x.Description, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.SuggestedAction)'>
+                        <span class="float-left">Suggested Action</span>
+                    </label>
+                </div>
+                <div class="html-control text">
+                    @Html.TextBoxFor(x => x.SuggestedAction, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label date-range">
+                    <label for='@Html.GetControlId(x => x.LastClarificationDateBegin)'>
+                        <span class="float-left">Last Sent for Clarification</span>
+                    </label>
+                </div>
+                <div class="html-control date-range">
+                    <span class="range-label">From</span>@Html.EditorFor(x => x.LastClarificationDateBegin)<span data-controlId="@Html.GetControlId(x => x.LastClarificationDateBegin)" class="web-sprite sprite-calendar clickable"></span>
+                    <span class="range-label">To</span>@Html.EditorFor(x => x.LastClarificationDateEnd)<span data-controlId="@Html.GetControlId(x => x.LastClarificationDateEnd)" class="web-sprite sprite-calendar clickable"></span>
+                </div>
+            </div>
+
+            <div class="section-item">
+                <div class="label">
+                    <label for='@Html.GetControlId(x => x.ClosedQuarter)'>
+                        <span class="float-left">Quarter Closed</span>
+                    </label>
+                </div>
+                <div class="html-control ddl">
+                    @*@Html.DropDownListFor(x => x.ClosedQuarter, new SelectList(new List<int> { 1, 2, 3, 4 }), "")*@
+                   @* <select id="SelectedClosedQuarter" name="SelectedClosedQuarter" multiple="multiple" class="multiSelect" >
+                        @for (int itm = 1; itm < 5; itm++)
+                        {
+                            <option value="@itm" >@itm</option>
+                        }
+                    </select>*@
+                    @Html.ListBoxFor(x => x.SelectedClosedQuarter, new MultiSelectList(new List<int> { 1, 2, 3, 4 }, ""), new { @class = "multiSelect" })
+                </div>
+            </div>
+
+            <div class="section-item text-range">
+                <div class="label text-range">
+                    <label for='@Html.GetControlId(x => x.LessonAgeBegin)'>
+                        <span class="float-left">Lesson Age (Open)</span>
+                    </label>
+                </div>
+                <div class="html-control text-range">
+                    <span class="range-label">From</span>@Html.TextBoxFor(x => x.LessonAgeBegin, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                    <span class="range-label">To</span>@Html.TextBoxFor(x => x.LessonAgeEnd, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+            <div class="section-item text-range">
+                <div class="label text-range">
+                    <label for='@Html.GetControlId(x => x.TimesSentToBpoBegin)'>
+                        <span class="float-left">No. of Times Sent to BPO</span>
+                    </label>
+                </div>
+                <div class="html-control text-range">
+                    <span class="range-label">From</span>@Html.TextBoxFor(x => x.TimesSentToBpoBegin, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                    <span class="range-label">To</span>@Html.TextBoxFor(x => x.TimesSentToBpoEnd, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                </div>
+            </div>
+
+        </div><!--End right-side-->
+
+        <div class="clear"></div>
+            <ul>
+                <li>@Html.ValidationMessageFor(x => x.Title)</li>
+                <li>@Html.ValidationMessageFor(x => x.Description)</li>
+                <li>@Html.ValidationMessageFor(x => x.CausalFactors)</li>
+                <li>@Html.ValidationMessageFor(x => x.SuggestedAction)</li>
+                <li>@Html.ValidationMessageFor(x => x.LastSentToBpoDateBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.LastSentToBpoDateEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.LastClarificationDateBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.LastClarificationDateEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.ClosedDateBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.ClosedDateEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.ResponseTurnaroundBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.ResponseTurnaroundEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.LessonAgeBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.LessonAgeEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.TimesSentForClarificationBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.TimesSentForClarificationEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.TimesSentToBpoBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.TimesSentToBpoEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.TimesBpoTransferedBegin)</li>
+                <li>@Html.ValidationMessageFor(x => x.TimesBpoTransferedEnd)</li>
+                <li>@Html.ValidationMessageFor(x => x.ClosedQuarter)</li>
+            </ul>
+
+        </div><!--End section-->
+    </div><!--End SectionThree-->
+
+</div>
+    </div>
+</div>

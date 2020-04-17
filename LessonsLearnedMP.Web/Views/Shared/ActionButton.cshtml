@@ -1,0 +1,49 @@
+﻿@model List<SaveActionOption>
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.ViewData
+@using Suncor.LessonsLearnedMP.Web.Helpers
+
+@{
+    var applicationContext = new ApplicationContext(Html.GetDistributedCache());
+    var userContext = new UserSessionContext(this.ViewContext.HttpContext);
+}
+
+@if (Model.Count > 0)
+{
+    int? selectedDiscipline = ViewBag.DisciplineId == null ? (int?)null : (int?)ViewBag.DisciplineId;
+    <div class="float-right">
+
+        @Html.DropDownList("BulkActionTransferBpoDisciplineId", new SelectList(Utils.ToDisplayList(applicationContext.Disciplines/*, selectedDiscipline*/, false, false), "Id", "Name", selectedDiscipline), new { @class = "nostyle" })
+        <div class="float-left" style="margin-right:3px;">
+
+    	    <button class='lesson-action-main lesson-action-ddl lesson-action display-none' data-saveAction='@Model.Where(x => x.ButtonType == ButtonType.MainDropDown).First().SaveAction'>
+                <span class="web-sprite @Model.Where(x => x.ButtonType == ButtonType.MainDropDown).First().IconClass combo-button-sprite"></span>@Model.Where(x => x.ButtonType == ButtonType.MainDropDown).First().ButtonText
+            </button>
+            @if (Model.Where(x => x.ButtonType == ButtonType.DropDownOption).Any())
+            {
+	            <button class="row-menu-button display-none">&nbsp;</button>
+                <ul class="split-button-options ui-corner-bottom ui-menu ui-widget ui-widget-content" style="display: none;position:absolute;z-index:9999;width:164px;" role="listbox" aria-activedescendant="ui-active-menuitem">
+                    @foreach (var option in Model.Where(x => x.ButtonType == ButtonType.DropDownOption))
+                    {
+                        <li class="ui-menu-item" role="menuitem">
+                            <a href="#" data-saveAction='@option.SaveAction' class="lesson-action lesson-action-option menu-link" tabindex="-1">
+                                <span class="web-sprite @option.IconClass combo-button-sprite"></span>@option.ButtonText
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        
+            @if (Model.Where(x => x.ButtonType == ButtonType.SecondaryAction).Any())
+            {
+                <div class="float-left" style="margin-right:10px;">
+            
+                        <button class='lesson-action-ddl display-none lesson-action' data-saveAction='@Model.Where(x => x.ButtonType == ButtonType.SecondaryAction).First().SaveAction'>
+                            <span class="web-sprite @Model.Where(x => x.ButtonType == ButtonType.SecondaryAction).First().IconClass combo-button-sprite"></span>@Model.Where(x => x.ButtonType == ButtonType.SecondaryAction).First().ButtonText
+                        </button>
+                </div>
+            }
+        
+        </div>
+    </div>
+}

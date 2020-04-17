@@ -1,0 +1,21 @@
+﻿body 
+{
+    behavior:url(../content/csshover3.htc);
+}
+
+/*
+.ui-corner-all,
+.ui-corner-top,
+.ui-corner-left,
+.ui-corner-tl,
+.ui-corner-right,
+.ui-corner-tr,
+.ui-corner-bottom,
+.ui-corner-bl,
+.ui-corner-br,
+.ui-corner-trbl
+{
+    position: relative;
+    behavior:url(../../Content/PIE.htc);
+}
+*/

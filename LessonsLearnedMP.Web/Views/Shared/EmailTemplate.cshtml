@@ -1,0 +1,124 @@
+﻿@model Suncor.LessonsLearnedMP.Web.ViewData.EmailTemplateViewData
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.Helpers
+
+@{/*Do not move styling into Site.css, this is required to be delivered to mail clients)*/}
+<style type="text/css">
+#EmailContent
+{
+    font-family:Arial;
+    font-size:10pt;
+}
+    
+#EmailContent .clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+#EmailContent p
+{
+    margin-bottom: 1em;
+    font-size:10pt;
+}
+
+</style> 
+
+@{
+    var appContext = new ApplicationContext(Html.GetDistributedCache());
+}
+
+<!--[if IE]>
+<style type="text/css">
+  .clearfix {
+    zoom: 1;     /* triggers hasLayout */
+    }  /* Only IE can see inside the conditional comment
+    and read this CSS rule. Don't ever use a normal HTML
+    comment inside the CC or it will close prematurely. */
+</style>
+<![endif]-->
+
+<div id="EmailContent">
+    @if (Model.Redirecting)
+    {
+        if (string.IsNullOrEmpty(Model.MailTo))
+        {
+            <p><strong>This message was originally intended for a user who is no longer in the system, or who's email address could not be determined. It has been re-directed to the Primary Administrator.</strong></p>
+        }
+        else
+        {
+            <p><strong>This message was originally intended for @Model.MailTo. It has been re-directed for testing purposes.</strong></p>
+        }
+    }
+
+    @switch (Model.NotificationType)
+    {
+        case Enumerations.NotificationEmailType.N1_NewToAdmin:
+            //<Admin name>, new lessons have been added to the Lessons Learned Database.  Please login <link> to review the lessons for credibility and completeness, then forward onto the BPO for validation.
+            <p>@Model.Administrator.FirstName @Model.Administrator.LastName, new lessons have been added to the Lessons Learned Database.</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/MyLessons/", UriKind.Relative))">login</a> to review the lessons for credibility and completeness, then forward onto the BPO for validation.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N2_AdminToBPO_And_BPOToBPO:
+                          //<BPO name>, you have new lessons waiting to validate from <LLC Name> of <Project Name>.   Please login <link> to review lessons assigned to you.
+            <p>@Model.OwningBpo.FirstName @Model.OwningBpo.LastName, you have new lessons waiting to validate from @Model.OwningCoordinator.FirstName @Model.OwningCoordinator.LastName of @(appContext.Projects.Where(x => x.Id == Model.Lesson.ProjectId).FirstOrDefault().Name).</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/MyLessons/", UriKind.Relative))">login</a> to review lessons assigned to you.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N3_AdminToClarification:
+        case Enumerations.NotificationEmailType.N5_BPOToClarification:
+                          //<LLC name>, you have a lesson waiting that requires additional information before it can be validated.
+                          //Please login <link> to review the Clarification Comments.  Once completed check “clarification complete” and select “send” to re-direct back to BPO for validation. (wording tbd based on design)
+            <p>@Model.OwningCoordinator.FirstName @Model.OwningCoordinator.LastName, you have a lesson waiting that requires additional information before it can be validated.</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/Edit/" + Model.Lesson.Id.ToString(), UriKind.Relative))">login</a> to review the Clarification Comments.  Once completed, select "Clarify and Transfer to BPO" to re-direct back to BPO for validation.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N4_ClarificationToAdmin:
+                          //<Admin Name>, lesson <lesson #> - <lesson title> has been updated and returned to you for validation.
+                          //Please login <link> to review the lessons for credibility and completeness, then forward onto the BPO for validation
+            <p>@Model.Administrator.FirstName @Model.Administrator.LastName, lessons @Model.Lesson.Id - @Model.Lesson.Title have been updated and returned to you for validation.</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/Edit/" + Model.Lesson.Id.ToString(), UriKind.Relative))">login</a> to review the lessons for credibility and completeness, then forward onto the BPO for validation.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N6_ClarificationToBPO:
+                          //<BPO name>, lesson <lesson #> - <lesson title> has been updated and returned to you for validation.
+                          //Please login <link> to review the lesson and start the validation process.  
+            <p>@Model.OwningBpo.FirstName @Model.OwningBpo.LastName, lesson @Model.Lesson.Id - @Model.Lesson.Title has been updated and returned to you for validation.</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/Edit/" + Model.Lesson.Id.ToString(), UriKind.Relative))">login</a> to review the lesson and start the validation process.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N7_BPOToCloseLLC:
+        case Enumerations.NotificationEmailType.N7_BPOToCloseOwner:
+                          //Lesson <lesson #> - "<lesson title>" has been reviewed and determined to be <valid/invalid> - <lesson type>.
+                          //Please login <link> to review the lesson results and communication this to the person who submitted the lesson.  
+            <p>Lesson @Model.Lesson.Id - "@Model.Lesson.Title" has been reviewed and determined to be 
+                @(Model.Lesson.LessonTypeValidId != null
+                ? "Valid - " + appContext.LessonTypesValid.Where(x => x.Id == Model.Lesson.LessonTypeValidId).FirstOrDefault().Name + "."
+                : "Invalid - " + appContext.LessonTypesInvalid.Where(x => x.Id == Model.Lesson.LessonTypeInvalidId).FirstOrDefault().Name + ".")
+            </p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/Edit/" + Model.Lesson.Id.ToString(), UriKind.Relative))">login</a> to review the lesson results and communicate this to the person who submitted the lesson.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N8_BPOUnvalidatedReminder:
+                          //<BPO name>, this is a reminder that you still have un-validated lessons assigned to you.
+                          //Please login <link> to review the list.  
+            <p>@Model.OwningBpo.FirstName @Model.OwningBpo.LastName, this is a reminder that you still have un-validated lessons assigned to you.</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/MyLessons/", UriKind.Relative))">login</a> to review the list.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N9_LLCDraftReminder:
+                          //<LLC name>, this is a reminder that you still have draft lessons that have not been sent on to validate.
+                          //Please login <link> to review the list and final submit to start the validation process.  
+            <p>@Model.OwningCoordinatorCreator.FirstName @Model.OwningCoordinatorCreator.LastName, this is a reminder that you still have draft lessons that have not been sent on to validate.</p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/MyLessons/", UriKind.Relative))">login</a> to review the list and final submit to start the validation process.</p>
+                          break;
+        case Enumerations.NotificationEmailType.N10_AssignToUser:
+                          //<BPO name>, you have new lessons waiting to validate from <LLC Name> of <Project Name>.   Please login <link> to review lessons assigned to you.
+            <p>@Model.AssignTo.FirstName @Model.AssignTo.LastName, you have new lessons waiting to validate from @Model.OwningCoordinator.FirstName @Model.OwningCoordinator.LastName of @(appContext.Projects.Where(x => x.Id == Model.Lesson.ProjectId).FirstOrDefault().Name).</p>
+            <p>Lesson # is @Model.Lesson.Id  </p>
+            <p>Please <a href="@Url.ToPublicUrl(new Uri("Lesson/MyLessons/", UriKind.Relative))">login</a> to review lessons assigned to you.</p>
+                          break;
+        default:
+                          break;
+    }
+    <!-- Add requsted footer here -->
+    <br />
+    <p>Do not reply to this email.  If you need assistance or are receiving this email in error please contact mailto:LLPGatekeeper@suncor.com </p>
+    <br />
+</div>

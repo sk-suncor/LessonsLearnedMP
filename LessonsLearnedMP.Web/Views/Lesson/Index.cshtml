@@ -1,0 +1,331 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js" type="text/javascript"></script>
+}   
+
+@model LessonIndexViewModel
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.Helpers
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.ViewData
+
+@{
+    var userCookieContext = new UserCookieContext(this.ViewContext.HttpContext);
+    var userSessionContext = new UserSessionContext(this.ViewContext.HttpContext);
+    var applicationContext = new ApplicationContext(Html.GetDistributedCache());
+    
+    Enumerations.NavigationPage navigationPage = Enumerations.NavigationPage.Edit;
+
+    switch (Model.PageAction)
+    {
+        case Enumerations.PageAction.Submit:
+            navigationPage = Enumerations.NavigationPage.Submit;
+            break;
+        case Enumerations.PageAction.Edit:
+            if (Utils.IsLessonEditable(Html.GetDistributedCache(), Model.Lesson, userSessionContext.CurrentUser)
+                || (ViewBag.NothingToEdit != null && (bool)ViewBag.NothingToEdit))
+            {
+                if (userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.BPO)
+                {
+                    navigationPage = Enumerations.NavigationPage.Validate;
+                }
+                else
+                {
+                    navigationPage = Enumerations.NavigationPage.Edit;
+                }
+            }
+            else
+            {
+                navigationPage = Enumerations.NavigationPage.Review;
+            }
+            break;
+        case Enumerations.PageAction.Search:
+            navigationPage = Enumerations.NavigationPage.Search;
+            break;
+        case Enumerations.PageAction.MyLessons:
+            navigationPage = Enumerations.NavigationPage.MyLessons;
+            break;
+    }
+    
+    switch (Model.PageAction)
+    {
+        case Enumerations.PageAction.Submit:
+            ViewBag.Title = "Submit Lesson";
+            break;
+        case Enumerations.PageAction.Edit:
+            ViewBag.Title = Utility.StringValue(navigationPage) + " Lesson";
+            break;
+        case Enumerations.PageAction.Search:
+            ViewBag.Title = "Search Lessons";
+            break;
+        case Enumerations.PageAction.MyLessons:
+            ViewBag.Title = "My Lessons";
+            break;
+    }
+
+    int pageSize = userCookieContext.SearchistPageSize;
+    int longFormHeight = userCookieContext.LongFormViewHeight;
+    int lessonListHeight = userCookieContext.LessonListHeight;
+}
+
+@section Navigation
+{
+    @Html.PartialAsync("Navigation", navigationPage)
+}
+
+@section Actions
+{
+    @{
+        bool readOnly = !Utils.IsLessonEditable(Html.GetDistributedCache(), Model.Lesson, userSessionContext.CurrentUser);
+        @Html.PartialAsync("ActionButton", new { pageAction = Model.PageAction, lessonStatus = Model.Lesson.Status, readOnly = readOnly, lessonEnabled = Model.Lesson.Enabled })
+    }
+}
+
+<script type="text/javascript">
+    var pageSize = @pageSize;
+    var lessonListHeight = @lessonListHeight;
+    var searchModel = @Html.Raw(HtmlHelpers.JsonSerializer(Model.SearchModel));
+    var searchModelString = JSON.stringify(searchModel);
+    var admin = @((userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator ? "true" : "false"));
+    var navigationPage = @((int)navigationPage);
+    var pageAction = @((int)Model.PageAction);
+
+    @foreach (var saveAction in Enum.GetValues(typeof(Enumerations.SaveAction)).Cast<Enumerations.SaveAction>().Select(x => x.ToString()))
+    {
+        <text>var saveAction</text>@saveAction<text> = "@saveAction";</text>
+    }
+
+</script>
+
+@Html.Script(Enumerations.JavaScript.LessonsLearnedLessonIndex)
+@Html.Script(Enumerations.Css.JquerySelectMenu)
+@Html.Script(Enumerations.JavaScript.JquerySelectMenu)
+
+
+@if (ViewBag.NothingToEdit != null && (bool)ViewBag.NothingToEdit)
+{
+    <div id="LongFormView" style="max-height:@(longFormHeight - 85)px">
+        <h1>You are all done!</h1>
+        <br />
+        <h3>You have no lessons that require review or validation.  Please use the search tab to browse lessons, or click the Submit tab to submit a new lesson.</h3>
+    </div>
+}
+else
+{
+    //Html.EnableClientValidation();
+    using (Html.BeginForm(Model.PageAction.ToString(), "Lesson", FormMethod.Post, new { id = "LessonForm", name = "LessonForm" }))
+    {
+        <div id="LongFormViewContent" class="@(Model.PageAction == Enumerations.PageAction.MyLessons ? "no-resize" : "" )">
+            @if (Model.PageAction == Enumerations.PageAction.Search)
+            {
+                @Html.Partial(Model.PageAction.ToString(), Model.SearchModel as SearchViewModel)
+            }
+            else
+            {
+                @Html.Partial(Model.PageAction.ToString(), Model.Lesson)
+            }
+        </div>
+    }
+
+    using (Html.BeginForm("BulkSave", "Lesson", FormMethod.Post, new { id = "BulkLessonForm", name = "BulkLessonForm" }))
+    {
+        
+        <div id="SectionTransferToBPOBulk" class='display-none'>
+        <div id="SectionTransferToBPOWrapperBulk" class="dark-theme popup-wrapper">
+
+            <div class="section ui-widget ui-widget-content ui-corner-all">
+                <table>
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.DisciplineId)' style="color:Black">
+                                    <span class="float-left helptip" data-helpTopic="@((int)Enumerations.HelpTopic.EditDiscipline)">Responsible Discipline *</span>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item">
+                                @Html.DropDownListFor(x => x.BulkLesson.TransferBpoDisciplineId, new SelectList(Utils.ToDisplayList(applicationContext.Disciplines, false, false), "Id", "Name"), new { @class = "nostyle popup" })
+                                <span id="BulkLesson_TransferBpoDisciplineId_validationMessage" class="field-validation-valid">Discipline is Required.</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.TransferBpoComment)' style="color:Black">
+                                    <span class="float-left">Transfer Comments *</span>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item text">
+                                @Html.TextAreaFor(x => x.BulkLesson.TransferBpoComment, new { @class = "" })
+                                <span id="BulkLesson_TransferBpoComment_validationMessage" class="field-validation-valid">Comment is Required.</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+    <div id="SectionRequiresClarificationBulk" class='display-none'>
+        <div id="SectionRequiresClarificationWrapperBulk" class="dark-theme popup-wrapper">
+            <div class="section ui-widget ui-widget-content ui-corner-all">
+                <table>
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.ClarificationComment)' style="color:Black">
+                                    <span class="float-left">Clarification Comments *</span>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item text">
+                                @Html.TextAreaFor(x => x.BulkLesson.ClarificationComment, new { @class = "" })
+                                <span id="BulkLesson_ClarificationComment_validationMessage" class="field-validation-valid">Comment is Required.</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+    <div id="SectionAssignToUserBulk" class='display-none'>
+        <div id="SectionAssignToUserWrapperBulk" class="dark-theme popup-wrapper">
+            <div class="section ui-widget ui-widget-content ui-corner-all">
+                <table>
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.AssignToUserId)' style="color:Black">
+                                    <span class="float-left">Assign to User *</span>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item text">
+                                 @Html.DropDownListFor(x => x.BulkLesson.AssignToUserId, new SelectList(Utils.ToDisplayList(applicationContext.AllUsers.Where(x => x.DisciplineId == userSessionContext.CurrentUser.DisciplineId).ToList(), false, false), "Name", "Name"), new { @class = "nostyle popup" })
+                                <span id="BulkLesson_AssignToUser_validationMessage" class="field-validation-valid">Please select a user to assign these lessons to.</span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="SectionClosedPopupBulk" class='section-closed display-none'>
+        <div id="SectionClosedPopupWrapperBulk" class="section-closed-popup-wrapper dark-theme popup-wrapper">
+            <div class="section ui-widget ui-widget-content ui-corner-all">
+                <table>
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.LessonTypeValidId)'>
+                                    <!--<a class="float-left live-link" href="@Utility.SafeGetAppConfigSetting("LiveLinkUrl_LessonType", "http://livelink/ecmlivelinkprd/llisapi.dll?func=ll&amp;objId=101217806&amp;objAction=download")" target="_blank">-->
+                                    <a class="float-left live-link" href="@Utility.SafeGetAppConfigSetting("LiveLinkUrl_LessonType", "http://ecm/ecmlivelinkprd/llisapi.dll/open/80532268")" target="_blank">
+                                        Lesson Type * <span class="web-sprite sprite-help-browser"></span>
+                                    </a>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item">
+                                <span class="range-label">Valid</span>@Html.RadioButtonFor(model => model.BulkLesson.IsLessonTypeValidSelected, true, new { @class = "radio" })
+                                <span class="range-label">Invalid</span>@Html.RadioButtonFor(model => model.BulkLesson.IsLessonTypeValidSelected, false, new { @class = "radio" })
+                                <div class="float-left" style="width:170px;">
+                                    @Html.DropDownListFor(x => x.BulkLesson.LessonTypeValidId, new SelectList(Utils.ToDisplayList(applicationContext.LessonTypesValid, false, false), "Id", "Name"), "", new { @class = "nostyle popup" })
+                                    @Html.DropDownListFor(x => x.BulkLesson.LessonTypeInvalidId, new SelectList(Utils.ToDisplayList(applicationContext.LessonTypesInvalid, false, false), "Id", "Name"), "", new { @class = "nostyle display-none popup" })
+                                </div>
+                                <span id="BulkLesson_LessonTypeId_validationMessage" class="field-validation-valid">Lesson Type is Required.</span>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.Resolution)'>
+                                    <span class="float-left helptip" data-helpTopic="@((int)Enumerations.HelpTopic.EditResolution)">Resolution *</span>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item text">
+                                @Html.TextAreaFor(x => x.BulkLesson.Resolution, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                                <span id="BulkLesson_Resolution_validationMessage" class="field-validation-valid">Resolution is Required.</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="first">
+                            <div class="section-item">
+                                <label for='@Html.GetControlId(x => x.BulkLesson.CloseComment)'>
+                                    <span class="float-left">Validation Comments</span>
+                                </label>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="section-item text">
+                                @Html.TextAreaFor(x => x.BulkLesson.CloseComment, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                            </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div><!--End SectionClosedPopupBulk -->
+
+    }
+}
+
+@section LessonGrid
+{
+    @if (ViewBag.NothingToEdit == null || !(bool)ViewBag.NothingToEdit)
+    {
+        <div id="LessonGrid" class="ui-widget ui-widget-content ui-corner-top" >
+            <div>
+                <table id="LessonList">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th><span id="SelectAll" class="select-all select-all-checkbox state-unchecked"></span></th>
+                            <th>Number</th>
+                            <th>Status</th>
+                            <th>Title</th>
+                            <th>Discipline</th>
+                            <th><div class="table-wrap-text">Date Submitted</div></th>
+                            <th>Contact</th>
+                            <th>Actions</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                        <tbody> 
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+

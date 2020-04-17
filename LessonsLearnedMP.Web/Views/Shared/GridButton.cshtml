@@ -1,0 +1,63 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js"></script>
+}
+
+@model LessonViewModel
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.ViewData
+@using Suncor.LessonsLearnedMP.Web.Helpers
+
+@{
+    UserSessionContext userSession = new UserSessionContext(this.ViewContext.HttpContext);
+    
+    bool readOnly = !Utils.IsLessonEditable(Html.GetDistributedCache(), Model, userSession.CurrentUser);
+    bool isAdmin = userSession.CurrentUser.RoleId == (int)Enumerations.Role.Administrator;
+    
+    if(readOnly && !isAdmin)
+    {
+        <a href="@Url.Action("Edit", "Lesson", new { id = Model.Id })" class="float-left"><span class='float-left web-sprite sprite-zoom'></span>&nbsp;View</a>
+    }
+    else
+    {
+        <div>
+            @if (Model.Enabled == true)
+            {
+                if (Model.Status == Enumerations.LessonStatus.Draft)
+                {
+                    <div><a href="@Url.Action("Submit", "Lesson", new { id = Model.Id })" class="float-left"><span class='float-left web-sprite sprite-pencil'></span>&nbsp;Edit & Submit</a><div class="clear"></div> </div>
+                }
+                else
+                {
+                    string buttonLabel = "Edit/Review";
+                    if (userSession.CurrentUser.RoleId == (int)Enumerations.Role.BPO)
+                    {
+                        buttonLabel = "Validate";
+                    }
+                    <div><a href="@Url.Action("Edit", "Lesson", new { id = Model.Id })" class="float-left"><span class='float-left web-sprite sprite-pencil'></span>&nbsp;@buttonLabel</a><div class="clear"></div> </div>
+                }
+            }
+            else
+            {
+                <div><a href="@Url.Action("Edit", "Lesson", new { id = Model.Id })" class="float-left"><span class='float-left web-sprite sprite-zoom'></span>&nbsp;Review</a><div class="clear"></div> </div>
+            }
+            
+    
+            @if (isAdmin || Model.Status == Enumerations.LessonStatus.Draft)
+            {
+                if (Model.Enabled == true)
+                {
+                    <div><a href="#" class="delete-record float-left" data-lessonId="@Model.Id" data-title="@Model.Title" data-url="@Url.Action("Delete", "Lesson", new { id = Model.Id }, "http")"><span class="float-left web-sprite sprite-delete16"></span>&nbsp;Delete</a><div class="clear"></div></div>
+                }
+                else
+                {
+                    <div><a href="#" class="un-delete-record float-left" data-lessonId="@Model.Id" data-title="@Model.Title" data-url="@Url.Action("UnDelete", "Lesson", new { id = Model.Id }, "http")"><span class="float-left web-sprite sprite-arrow-undo"></span>&nbsp;Un-Delete</a><div class="clear"></div></div>
+                }
+            }
+        </div>
+    }
+}
+
+

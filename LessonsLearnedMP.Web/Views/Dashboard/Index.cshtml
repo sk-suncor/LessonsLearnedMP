@@ -1,0 +1,128 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js" type="text/javascript"></script>
+}   
+
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.Helpers
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.ViewData
+
+@{
+    ViewBag.Title = "Dashboard";
+    UserSessionContext userSessionContext = new UserSessionContext(this.ViewContext.HttpContext);
+    ApplicationContext appContext = new ApplicationContext(Html.GetDistributedCache());
+
+    List<int> years = new List<int>();
+
+    int minimumYear = 2009;
+    int currentYear = Utility.GetCurrentDateTimeAsMST().Year;
+
+    for (int i = minimumYear; i <= currentYear; i++)
+    {
+        years.Add(i);
+    }
+
+    //Business rule: All lessons prior to Jan 1 2010 are lessons that have not been validated
+    //We group them up here under "0", meaning anything previous to 2010
+    var yearList = from y in years
+                   select new
+                   {
+                       Value = y == 2009 ? 0 : y,
+                       Label = y == 2009 ? "Pre-2010" : y.ToString()
+                   };
+}
+
+<script type="text/javascript">
+    var admin = @(userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator ? "true" : "false");
+    var currentYear = @currentYear;
+</script>
+
+@section Navigation
+{
+    @Html.Partial("Navigation", Enumerations.NavigationPage.Dashboard)
+}
+
+<!--[if lt IE 9]>@Html.Script(Enumerations.JavaScript.Excanvas)<![endif]-->
+@Html.Script(Enumerations.JavaScript.JqueryJqplot)
+@Html.Script(Enumerations.JavaScript.JqueryJqplot_PieRenderer)
+@Html.Script(Enumerations.JavaScript.JqueryJqplot_BarRenderer)
+@Html.Script(Enumerations.JavaScript.JqueryJqplot_CategoryAxisRenderer)
+@*@Html.Script(Enumerations.JavaScript.JqueryJqplot_DateAxisRenderer)*@
+@Html.Script(Enumerations.JavaScript.JqueryJqplot_PointLabels)
+@Html.Script(Enumerations.JavaScript.JqueryJqplot_Highlighter)
+@Html.Script(Enumerations.JavaScript.JqueryJqplot_Cursor)
+@Html.Script(Enumerations.JavaScript.JquerySelectMenu)
+
+@Html.Script(Enumerations.JavaScript.LessonsLearnedDashboard)
+
+@Html.Script(Enumerations.Css.JqueryJqplot)
+@Html.Script(Enumerations.Css.JquerySelectMenu)
+
+<div id="OpenTitle">
+    <div class="float-left" style="font-size: 16pt;font-family:'Trebuchet MS',Arial,Helvetica,sans-serif;margin-left:18px">
+        @if (userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator)
+        {
+            <span class="float-left" style="margin-right:5px;">All Open Lessons by Status</span>
+        }
+        else
+        {
+            <span class="float-left" style="margin-right:5px;">My Open Lessons by Status</span>
+        }
+    </div>
+
+    <div class="float-right" style="font-size: 12pt;font-family:'Trebuchet MS',Arial,Helvetica,sans-serif;margin-right:10px;width:150px;">
+        <span class="web-sprite sprite-help-browser float-left helptip" data-helpTopic="@((int)Enumerations.HelpTopic.DashboardOpenChart)" style="margin-right: 5px"></span><span class="total-open-lessons">0</span> Lessons Currently Open
+    </div>
+</div>
+
+<div class="clear"></div>
+
+<div id="OpenLessonsPie" style="height:400px;width:100%; "></div> 
+
+<div id="ClosedTitle">
+    <div class="float-left" style="font-size: 16pt;font-family:'Trebuchet MS',Arial,Helvetica,sans-serif;margin-left:18px">
+        @if (userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator)
+        {
+            <span class="float-left" style="margin-right:5px;">All</span>
+        }
+        else
+        {
+            <span class="float-left" style="margin-right:5px;">My</span>
+        }
+
+        @if (userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator || userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.BPO)
+        {
+            <div class="ui-widget ui-widget-content ui-state-default ui-corner-all float-left" style="font-size: 15pt;font-family:Lucida Grande,Lucida Sans,Arial,sans-serif;">
+                <span>Valid</span> @Html.RadioButton("IsValidSelected", "True", true) <span>Invalid</span> @Html.RadioButton("IsValidSelected", "False", false)
+            </div>
+        }
+        else
+        {
+            <span class="lesson-type-label float-left">Valid</span>
+        }
+        
+        <div class="float-left" style="margin-left:5px;">
+            <span class="float-left">Closed Lessons by Lesson Type For</span>
+            <div class="float-left" style="font-size: 10pt;font-family:Lucida Grande,Lucida Sans,Arial,sans-serif;margin-left:5px;">@Html.DropDownList("Year", new SelectList(yearList, "Value", "Label", currentYear))</div>
+        </div>
+    </div>
+
+    <div class="float-right" style="font-size: 12pt;font-family:'Trebuchet MS',Arial,Helvetica,sans-serif;margin-right:10px;width:150px;">
+        <span class="web-sprite sprite-help-browser float-left helptip" data-helpTopic="@((int)Enumerations.HelpTopic.DashboardClosedChart)" style="margin-right: 5px"></span><span class="total-closed-lessons">0</span> <span class="lesson-type-label">Valid</span> Lessons Closed in <span class="year-label">@currentYear</span>
+    </div>
+</div>
+
+<div class="clear"></div>
+
+<div id="ClosedLessonsChart" style="height:400px;width:100%; "></div> 
+
+<div id="OpenLessonHelp" class="display-none">
+    <p>To view a list of lessons for each section, either click on the link in the Legend box below, or click the desired section in the pie chart.</p>
+    <p>This will populate your Lesson List with the desired results.</p>
+</div>
+
+<div id="ClosedLessonHelp" class="display-none">
+    <p>To View a list of closed lessons for the desired month, simply click the desired section in the bar graph to the left.</p>
+</div>

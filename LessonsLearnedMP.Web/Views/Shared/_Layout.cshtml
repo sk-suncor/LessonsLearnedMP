@@ -1,0 +1,140 @@
+@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js"></script>
+}   
+
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.Helpers
+@using Suncor.LessonsLearnedMP.Framework
+
+@{
+    Layout = "__BaseLayout.cshtml";
+    ViewBag.DOCTYPE = "<!DOCTYPE HTML >";
+    
+    var userSession = new UserSessionContext(this.ViewContext.HttpContext);
+    var appContext = new ApplicationContext(Html.GetDistributedCache());
+    Enumerations.Role userPrivilege = Enumerations.Role.User;
+    
+    if(userSession.CurrentUser != null)
+    {
+        userPrivilege = (Enumerations.Role)userSession.CurrentUser.RoleId;
+    }
+    
+    string userName = Utils.FormatUserNameForDisplay(userSession.CurrentUser, false);
+    
+    string privilegeLabel = "";
+
+    if (userPrivilege != Enumerations.Role.User)
+    {
+        privilegeLabel = "(" + userPrivilege.ToString() + ")";
+    }
+}
+
+<script type="text/javascript">
+    var csvDownloadRequired = @((userSession.ExportLog != null && !userSession.ExportLog.Downloaded ? "true" : "false"));
+</script>
+
+<div id="background">
+    <img src="@Url.Content("~/Content/images/subtle-waves1024.jpg")" alt="" />
+</div>
+
+<div id="Wrapper">
+    <div id="HeaderFreeze">
+        <div id="Header" class="ui-widget ui-widget-content ui-corner-top">
+            <div id="HeaderTop">
+
+                <div class="logo">
+                    <a href="http://www.suncor.com/">
+                        <img src="@Url.Content("~/Content/images/Transparent.gif")" alt="" />
+                    </a>
+                    <span class="web-sprite sprite-suncor-logo"></span>
+                </div>
+
+                <div id="HeaderTitle">@ViewBag.Title @Utility.SafeGetAppConfigSetting("OverrideSubtitle", "")</div>
+
+                <div class="head-info">
+                    <div class="user-info ui-widget ui-state-active ui-corner-trbl">
+                        <span class="web-sprite sprite-user float-left"></span>
+                            <div class="user-name">
+                                @userName
+
+                                @if (bool.Parse(Utility.SafeGetAppConfigSetting("Debug_AllUserPermissionChange", "false")))
+                                {
+                                    @Html.DropDownList("RoleChange", new SelectList(appContext.AllReferenceValues.Where(x => x.ReferenceTypeId == (int)Enumerations.ReferenceType.Role), "Id", "Name", (int)userPrivilege))
+                                }
+                                else
+                                {
+                                    @privilegeLabel
+                                }
+                            </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div id="SiteTitle">
+                        <a href="@Url.Content("~/")">
+                            <span>Lessons Learned</span>
+                            <span class="ie6 display-none">Using IE6-8.css</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="clear"></div>
+
+        <div id="HeaderContent" class="ui-widget ui-widget-content ui-state-active ui-corner-bottom">
+            <div id="Navigation">
+                @RenderSection("Navigation", false)
+            </div>
+
+            <div id="AdminLink">
+                @RenderSection("Actions", false)
+            </div>
+        </div>
+
+    </div>
+
+	<div id="Content" class="ui-widget ui-widget-content ui-corner-all">
+
+		@if (!ViewContext.ModelState.IsValid && Html.ValidationSummary() != null)
+        {
+            <div id="_FAULT">
+      
+				<div id="FaultMessage" class="ui-widget ui-state-error ui-corner-all header-icon-error-padding info"> 
+                    <div class="float-left" style="width:80%">
+					    <span class="ui-icon ui-icon-alert ui-icon-info-message float-left"></span>
+                        <span><strong>Error:</strong>@Html.ValidationSummary().Raw()</span>
+                    </div>
+                    <p class="float-right"><span class="web-sprite sprite-emblem-unreadable clickable float-right" data-hideId='FaultMessage' title='Close This Alert'></span></p>
+				</div>
+            <div class="clear"></div>
+
+            </div>
+        }
+        
+        @if (ViewBag.ShowAlert ?? false)
+        {
+	        <div id="SuccessfullySaved" class="ui-widget ui-state-highlight ui-corner-all info @((bool)ViewBag.AlertDeferred ? "deferred display-none" : "")"> 
+		        <p class="float-left" style="width:900px"><span class="web-sprite @ViewBag.AlertSprite float-left"></span><strong>@ViewBag.AlertMessage</strong></p>
+                <p class="float-right"><span class="web-sprite sprite-emblem-unreadable clickable float-right" data-hideId='SuccessfullySaved' title='Close This Alert'></span></p>
+                <div class="clear"></div>
+	        </div>
+
+            <div class="clear"></div>
+        }
+        @RenderBody()
+	</div>
+
+    @RenderSection("LessonGrid", false)
+		 
+    <div class="clear"></div>
+	<div id="Footer" class="ui-widget ui-widget-content ui-state-active ui-corner-bottom">
+        <span class="float-left">&copy;@Utility.GetCurrentDateTimeAsMST().Year Suncor Energy Inc. All Rights Reserved.</span>
+        <span class="float-right">Lessons Learned: Major Projects [Version @HtmlHelpers.ProductVersion()]</span>
+	</div>
+
+</div>
+
+
+
+

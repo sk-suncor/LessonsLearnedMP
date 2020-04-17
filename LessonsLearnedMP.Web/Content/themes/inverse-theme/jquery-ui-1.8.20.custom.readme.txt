@@ -1,0 +1,143 @@
+
+I did further customization to the theme. So after or before downloading a new theme, replace with the following:
+
+Base Theme: Cupertino
+http://jqueryui.com/download/?themeParams=%3FffDefault%253DLucida%252BGrande%25252C%252BLucida%252BSans%25252C%252BArial%25252C%252Bsans-serif%2526fwDefault%253Dbold%2526fsDefault%253D1.1em%2526cornerRadius%253D6px%2526bgColorHeader%253Ddeedf7%2526bgTextureHeader%253D03_highlight_soft.png%2526bgImgOpacityHeader%253D100%2526borderColorHeader%253Daed0ea%2526fcHeader%253D222222%2526iconColorHeader%253D72a7cf%2526bgColorContent%253Df2f5f7%2526bgTextureContent%253D04_highlight_hard.png%2526bgImgOpacityContent%253D100%2526borderColorContent%253Ddddddd%2526fcContent%253D362b36%2526iconColorContent%253D72a7cf%2526bgColorDefault%253Dd7ebf9%2526bgTextureDefault%253D02_glass.png%2526bgImgOpacityDefault%253D80%2526borderColorDefault%253Daed0ea%2526fcDefault%253D2779aa%2526iconColorDefault%253D3d80b3%2526bgColorHover%253De4f1fb%2526bgTextureHover%253D02_glass.png%2526bgImgOpacityHover%253D100%2526borderColorHover%253D74b2e2%2526fcHover%253D0070a3%2526iconColorHover%253D2694e8%2526bgColorActive%253Deef6fc%2526bgTextureActive%253D05_inset_soft.png%2526bgImgOpacityActive%253D75%2526borderColorActive%253D2694e8%2526fcActive%253D0070a3%2526iconColorActive%253D0070a3%2526bgColorHighlight%253Dffef8f%2526bgTextureHighlight%253D03_highlight_soft.png%2526bgImgOpacityHighlight%253D25%2526borderColorHighlight%253Df9dd34%2526fcHighlight%253D363636%2526iconColorHighlight%253D2e83ff%2526bgColorError%253Dcd0a0a%2526bgTextureError%253D01_flat.png%2526bgImgOpacityError%253D15%2526borderColorError%253Dcd0a0a%2526fcError%253Dffffff%2526iconColorError%253Dffffff%2526bgColorOverlay%253Deeeeee%2526bgTextureOverlay%253D08_diagonals_thick.png%2526bgImgOpacityOverlay%253D90%2526opacityOverlay%253D80%2526bgColorShadow%253D000000%2526bgTextureShadow%253D04_highlight_hard.png%2526bgImgOpacityShadow%253D70%2526opacityShadow%253D30%2526thicknessShadow%253D7px%2526offsetTopShadow%253D-7px%2526offsetLeftShadow%253D-7px%2526cornerRadiusShadow%253D8px
+
+.inverse-theme .ui-widget { font-family: Arial, Lucida Grande, Lucida Sans, sans-serif; font-size: 1em; }
+
+.inverse-theme .ui-menu .ui-menu-item a {
+	text-decoration:none;
+	display:block;
+	padding:.2em .4em;
+	line-height:1;
+	zoom:1;
+}
+
+*******Replace the entire Misc visuals section with the following*******
+
+/* Misc visuals
+----------------------------------*/
+
+/* Corner radius */
+/*
+.inverse-theme .ui-corner-all, .inverse-theme .ui-corner-top, .inverse-theme .ui-corner-left, .inverse-theme .ui-corner-tl { -moz-border-radius-topleft: 6px; -webkit-border-top-left-radius: 6px; -khtml-border-top-left-radius: 6px; border-top-left-radius: 6px; }
+.inverse-theme .ui-corner-all, .inverse-theme .ui-corner-top, .inverse-theme .ui-corner-right, .inverse-theme .ui-corner-tr { -moz-border-radius-topright: 6px; -webkit-border-top-right-radius: 6px; -khtml-border-top-right-radius: 6px; border-top-right-radius: 6px; }
+.inverse-theme .ui-corner-all, .inverse-theme .ui-corner-bottom, .inverse-theme .ui-corner-left, .inverse-theme .ui-corner-bl { -moz-border-radius-bottomleft: 6px; -webkit-border-bottom-left-radius: 6px; -khtml-border-bottom-left-radius: 6px; border-bottom-left-radius: 6px; }
+.inverse-theme .ui-corner-all, .inverse-theme .ui-corner-bottom, .inverse-theme .ui-corner-right, .inverse-theme .ui-corner-br { -moz-border-radius-bottomright: 6px; -webkit-border-bottom-right-radius: 6px; -khtml-border-bottom-right-radius: 6px; border-bottom-right-radius: 6px; }
+
+*/
+
+.inverse-theme .ui-corner-all
+{
+    border-radius: 8px 8px 8px 8px;
+    -moz-border-radius: 8px 8px 8px 8px;
+    -webkit-border-radius: 8px 8px 8px 8px;
+    -khtml-border-bottom-right-radius: 8px 8px 8px 8px;
+}
+
+.inverse-theme .ui-corner-bottom
+{
+    border-radius: 0 0 8px 8px;
+    -moz-border-radius: 0 0 8px 8px;
+    -webkit-border-radius: 0 0 8px 8px;
+    -khtml-border-bottom-right-radius: 0 0 8px 8px;
+}
+
+.inverse-theme .ui-corner-top
+{
+    border-radius: 8px 8px 0 0;
+    -moz-border-radius: 8px 8px 0 0;
+    -webkit-border-radius: 8px 8px 0 0;
+    -khtml-border-bottom-right-radius: 8px 8px 0 0;
+}
+
+.inverse-theme .ui-corner-right
+{
+    border-radius: 0 8px 8px 0;
+    -moz-border-radius: 0 8px 8px 0;
+    -webkit-border-radius: 0 8px 8px 0;
+    -khtml-border-bottom-right-radius: 0 8px 8px 0;
+}
+
+.inverse-theme .ui-corner-left
+{
+    border-radius: 8px 0 0 8px;
+    -moz-border-radius: 8px 0 0 8px;
+    -webkit-border-radius: 8px 0 0 8px;
+    -khtml-border-bottom-right-radius: 8px 0 0 8px;
+}
+
+.inverse-theme .ui-corner-tr
+{
+    border-radius: 0 8px 0 0;
+    -moz-border-radius: 0 8px 0 0;
+    -webkit-border-radius: 0 8px 0 0;
+    -khtml-border-bottom-right-radius: 0 8px 0 0;
+}
+
+.inverse-theme .ui-corner-br
+{
+    border-radius: 0 0 8px 0;
+    -moz-border-radius: 0 0 8px 0;
+    -webkit-border-radius: 0 0 8px 0;
+    -khtml-border-bottom-right-radius: 0 0 8px 0;
+}
+
+.inverse-theme .inverse-theme .ui-corner-tl
+{
+    border-radius: 8px 0 0 0;
+    -moz-border-radius: 8px 0 0 0;
+    -webkit-border-radius: 8px 0 0 0;
+    -khtml-border-bottom-right-radius: 8px 0 0 0;
+}
+
+.inverse-theme .ui-corner-bl
+{
+    border-radius: 0 0 0 8px;
+    -moz-border-radius: 0 0 0 8px;
+    -webkit-border-radius: 0 0 0 8px;
+    -khtml-border-bottom-right-radius: 0 0 0 8px;
+}
+
+.inverse-theme .ui-corner-tl.ui-corner-bl
+{
+    border-radius: 8px 0 0 8px;
+    -moz-border-radius: 8px 0 0 8px;
+    -webkit-border-radius: 8px 0 0 8px;
+    -khtml-border-bottom-right-radius: 8px 0 0 8px;
+}
+
+.inverse-theme .ui-corner-tr.ui-corner-br
+{
+    border-radius: 0 8px 8px 0;
+    -moz-border-radius: 0 8px 8px 0;
+    -webkit-border-radius: 0 8px 8px 0;
+    -khtml-border-bottom-right-radius: 0 8px 8px 0;
+}
+
+.inverse-theme .ui-corner-bl.ui-corner-br
+{
+    border-radius: 0 0 8px 8px;
+    -moz-border-radius: 0 0 8px 8px;
+    -webkit-border-radius: 0 0 8px 8px;
+    -khtml-border-bottom-right-radius: 0 0 8px 8px;
+}
+
+.inverse-theme .ui-corner-tl.ui-corner-tr
+{
+    border-radius: 8px 8px 0 0;
+    -moz-border-radius: 8px 8px 0 0;
+    -webkit-border-radius: 8px 8px 0 0;
+    -khtml-border-bottom-right-radius: 8px 8px 0 0;
+}
+
+.inverse-theme .ui-corner-trbl
+{
+    border-radius: 0 8px 0 8px;
+    -moz-border-radius: 0 8px 0 8px;
+    -webkit-border-radius: 0 8px 0 8px;
+    -khtml-border-bottom-right-radius: 0 8px 0 8px;
+}
+
+/* Overlays */

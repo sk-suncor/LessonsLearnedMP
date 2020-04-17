@@ -1,0 +1,44 @@
+﻿@model Suncor.LessonsLearnedMP.Framework.Enumerations.NavigationPage
+@using Suncor.LessonsLearnedMP.Web.ViewData
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.Common
+
+@{
+    UserSessionContext userSessionContext = new UserSessionContext(this.ViewContext.HttpContext);
+    List<NavigationOption> tabs = new List<NavigationOption>();
+
+    tabs.Add(new NavigationOption { Action = "Index", Controller = "Home", IconClass = "sprite-house", Label = Utility.StringValue(Enumerations.NavigationPage.Home), Selected = Model == Enumerations.NavigationPage.Home });
+    tabs.Add(new NavigationOption { Action = "MyLessons", Controller = "Lesson", IconClass = "sprite-book", Label = Utility.StringValue(Enumerations.NavigationPage.MyLessons), Selected = Model == Enumerations.NavigationPage.MyLessons });
+    tabs.Add(new NavigationOption { Action = "Submit", Controller = "Lesson", IconClass = "sprite-add", Label = Utility.StringValue(Enumerations.NavigationPage.Submit), Selected = Model == Enumerations.NavigationPage.Submit });
+
+    var editTabName = userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.BPO ? Utility.StringValue(Enumerations.NavigationPage.Validate) : Utility.StringValue(Enumerations.NavigationPage.Edit);
+    var editSelected = false;
+
+    switch (Model)
+    {
+        case Enumerations.NavigationPage.Edit:
+        case Enumerations.NavigationPage.Review:
+        case Enumerations.NavigationPage.Validate:
+            editTabName = Utility.StringValue(Model);
+            editSelected = true;
+            break;
+    }
+
+    tabs.Add(new NavigationOption { Action = "Edit", Controller = "Lesson", IconClass = "sprite-pencil", Label = editTabName, Selected = editSelected });
+    tabs.Add(new NavigationOption { Action = "Search", Controller = "Lesson", IconClass = "sprite-zoom", Label = Utility.StringValue(Enumerations.NavigationPage.Search), Selected = Model == Enumerations.NavigationPage.Search });
+    
+    if (userSessionContext.CurrentUser.RoleId != (int)Enumerations.Role.User)
+    {
+        tabs.Add(new NavigationOption { Action = "Index", Controller = "Dashboard", IconClass = "sprite-chart-pie", Label = Utility.StringValue(Enumerations.NavigationPage.Dashboard), Selected = Model == Enumerations.NavigationPage.Dashboard });
+    }
+
+    if (userSessionContext.CurrentUser.RoleId == (int)Enumerations.Role.Administrator)
+    {
+        tabs.Add(new NavigationOption { Action = "Index", Controller = "Admin", IconClass = "sprite-brick-edit", Label = Utility.StringValue(Enumerations.NavigationPage.Administration), Selected = Model == Enumerations.NavigationPage.Administration });
+    }
+}
+
+@foreach (var tab in tabs)
+{
+    <a href="@Url.Action(tab.Action, tab.Controller)" class="button @(tab.Selected ? "selected-tab ui-state-active" : "" )"><span class="web-sprite @tab.IconClass"></span>&nbsp;@tab.Label</a>
+}

@@ -1,0 +1,52 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js" type="text/javascript"></script>
+}   
+
+@model AdminViewData
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.Helpers
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.ViewData
+@using Newtonsoft;
+ 
+<div class="edit-reference-values-content">
+    @Html.HiddenFor(x => x.ListName)
+
+    <script type="text/javascript">
+        $(function () {
+            systemValues = @Html.Raw(Model.EditingReferenceValueList.Where(x => x.System).Select(x => x.Name).ToArray()).ToJson());
+        });
+    </script>
+
+    <div class="label">
+        <label>
+            <span class="float-left">Add New @Model.ListName</span>
+        </label>
+    </div>
+
+    <div class="clear"></div>
+
+    <div class="section-item">
+                
+        <input class="reference-list-entry float-left ui-widget ui-state-default ui-corner-all clearfix" data-disabledListId="ReferenceValueDisabled" id="AddReferenceValue" data-listId="ReferenceValueEnabled" name="AddReferenceValue" type="text" value="" />
+
+        <div class="single-button lr-list-left-outer-button ui-widget ui-state-default ui-corner-all">
+            <ul>
+                <li title="Add Selected Value" class="button-top"><span title="Add New Value" data-inputId="@Html.GetControlId(x => x.AddReferenceValue)" data-listId="@Html.GetControlId(x => x.ReferenceValueEnabled)" data-disabledListId="@Html.GetControlId(x => x.ReferenceValueDisabled)" class="web-sprite sprite-add clickable multi-add clearfix float-left"></span></li>
+            </ul>
+        </div>
+                    
+    </div>
+    <div class="clear"></div>
+
+    @Html.LeftRightListBoxFor(x => x.ReferenceValueEnabled, x => x.ReferenceValueDisabled,
+            new MultiSelectList(Model.ReferenceValueEnabled), new MultiSelectList(Model.ReferenceValueDisabled), null)
+
+    <div class="clear"></div>
+    @Html.ValidationMessageFor(x => x.ReferenceValueEnabled)
+    <div data-parentInputId="@Html.GetControlId(x => x.AddReferenceValue)" class="value-exists display-none">
+        <span class="web-sprite sprite-error float-left"></span> The supplied value already exists.
+    </div>
+</div>

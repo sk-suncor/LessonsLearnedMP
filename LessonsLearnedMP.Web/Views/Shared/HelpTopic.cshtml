@@ -1,0 +1,167 @@
+﻿@model Enumerations.HelpTopic
+@using Suncor.LessonsLearnedMP.Framework
+
+<div class="help-topic">
+@{
+    switch (Model)
+    {
+        case Enumerations.HelpTopic.LessonList:
+            <div id="LessonListHelpTopic" style="width:700px">
+                <h2 style="text-align:center;margin-bottom:10px;">Lesson List - Help</h2>
+
+                <div class="float-left" style="width:265px">
+                    <span class="help-sprite help-sprite-lessonlistleft" style="border: 1px solid black"></span>
+                </div>
+                <div class="float-left" style="width:434px">
+                    <ul style="list-style-type:none">
+                        <li>
+                            <p class="float-left" style="width:94%">1. Use this list to change the number of lessons shown per page in your list.</p>
+                        </li>
+                        <li>
+                            <p class="float-left" style="width:94%">2. You can sort by clicking on the column header.  Clicking the same header will toggle between Ascending and Descending order.@*  You can also sort by more than one column at a time by holding down the Shift key while clicking on an additional column.*@</p>
+                        </li>
+                        <li>
+                            <p class="float-left" style="width:94%">3. Use the checkboxes to select one or more lessons to action.  Options available for the current selection will appear in the Action Button (4) below.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <p class="float-left" style="width:96%">4. The Action Button will allow you to do bulk operations on the selected lessons.  For example, you could submit all of your draft lessons at once.  For additional actions, click the arrow button to the right of the Action Button (if present).</p>
+
+                <span class="help-sprite help-sprite-lessonlistright float-right" style="margin-bottom:5px;border: 1px solid black"></span>
+
+                <div class="float-left" style="width:100%">
+                    <ul style="list-style-type:none">
+                        <li>
+                            <p class="float-left" style="width:96%">5. Drag the resize handle up or down to customize your view.</p>
+                        </li>
+                        <li>
+                            <p class="float-left" style="width:96%">6. Use the paging buttons to navigate your list when the results won't fit on a single page.</p>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="clear"></div>
+            </div>
+            break;
+        case Enumerations.HelpTopic.DashboardOpenChart:
+            <p>To view a list of lessons for each section, either click on the link in the Legend box below, or click the desired section in the pie chart.</p>
+            <p>This will populate your Lesson List with the desired results.</p>
+            break;
+        case Enumerations.HelpTopic.DashboardClosedChart:
+            <p>To View a list of closed lessons for the desired month, simply click the desired section in the bar graph to the left.</p>
+            <p>You can also view a list of closed lessons spanning the selected year by clicking on the links in the Legend box below.</p>
+            break;
+        case Enumerations.HelpTopic.EditProjectName:
+            <p>The official name of the project you are generating lessons for.</p>
+            break;
+        case Enumerations.HelpTopic.EditLLCoordinator:
+            <p>The person responsible for managing the Lessons Learned Process on behalf of the project they are assigned to</p>
+            break;
+        case Enumerations.HelpTopic.EditProjectPhase:
+            <p>The current SPIM phase of the project you are submitting lessons for:</p>
+            <ul>
+                <li>Scoping</li>
+                <li>Design Basis Memorandum (DBM)</li>
+                <li>Engineering Design Specification (EDS)</li>
+                <li>Execution</li>
+                <li>Commissioning and Start up and Close out (C&SU)</li>
+                <li>Outage/Turnaround</li>
+            </ul>
+            break;
+        case Enumerations.HelpTopic.EditProjectClassification:
+            <p>Helps classify projects into general groupings to increase searching functionality</p>
+            break;
+        case Enumerations.HelpTopic.EditSessionDate:
+            <p>The date the end of phase session occurred</p>
+            break;
+        case Enumerations.HelpTopic.EditLocation:
+            <p>The location the project took place</p>
+            break;
+        case Enumerations.HelpTopic.EditLessonTitle:
+            <p>Short descriptor that gives the reader a high level understanding of the lesson</p>
+            break;
+        case Enumerations.HelpTopic.EditDescription:
+            <p>Detailed description of what the lesson is about (provide as much detail as possible so future projects can clearly understand the situation)</p>
+            break;
+        case Enumerations.HelpTopic.EditCausalFactors:
+            <p>Identifies the contributing factor(s) that caused the identified lesson</p>
+            break;
+        case Enumerations.HelpTopic.EditSuggestedAction:
+            <p>Description of the suggested action the project team recommends to mitigate this from happening in future projects</p>
+            break;
+        case Enumerations.HelpTopic.EditBenefit:
+            <p>Descriptor of what the benefit is of implementing this lesson</p>
+            break;
+        case Enumerations.HelpTopic.EditBenefitRange:
+            <p>Identifying a dollar value of the potential benefit that may be realized if this lesson is implemented</p>
+            break;
+        case Enumerations.HelpTopic.EditCostImpact:
+            <p>The potential cost impact of not applying this lesson to future projects</p>
+            break;
+        case Enumerations.HelpTopic.EditRiskRanking:
+            <p>Identifies the risk ranking of this lesson as of the time it was submitted</p>
+            <p>Click to view the Suncor Risk Matrix</p>
+            break;
+        case Enumerations.HelpTopic.EditDiscipline:
+            <p>The Business Process Owner (BPO) responsible to validate the lesson based on their area of expertise</p>
+            break;
+        case Enumerations.HelpTopic.EditCredibilityChecklist:
+            <p>Used to verify the validity of the lesson being submitted.  The Credibility Checklist provides a way for submitters to identify why the lesson being submitted is a credible entry into the Lessons Learned Database.</p>
+            <p>Click to download the Checklist.</p>
+            break;
+        case Enumerations.HelpTopic.EditContact:
+            <p>Name of the person who identified this lesson submission</p>
+            break;
+        case Enumerations.HelpTopic.EditThemes:
+            <p>Identify the theme(s) of the lesson to increase searching functionality (e.g. is this a Training or Communication Opportunity)</p>
+            break;
+        case Enumerations.HelpTopic.EditSupportingDocuments:
+            <p>Link to a supporting document residing in Livelink (note: permissions on the file must be adjusted to allow viewing)</p>
+            break;
+        case Enumerations.HelpTopic.EditEstimatedCompletion:
+            <p>Indicates when the BPO will validate and close the lesson</p>
+            break;
+        case Enumerations.HelpTopic.EditResolution:
+            <p>Identifies how the BPO resolved the lesson</p>
+            break;
+        case Enumerations.HelpTopic.EditNumber:
+            <p>Unique identifying number for each lesson record</p>
+            break;
+        case Enumerations.HelpTopic.EditStatus:
+            <p>The status of the lesson in the validation lifecycle</p>
+            break;
+        case Enumerations.HelpTopic.EditSubmittedBy:
+            <p>The person who is submitting the lesson</p>
+            break;
+        case Enumerations.HelpTopic.EditSubmittedDate:
+            <p>Date the lesson was submitted</p>
+            break;
+        case Enumerations.HelpTopic.EditLessonAge:
+            <p>The time between the submission date and the date the lesson was closed</p>
+            break;
+        case Enumerations.HelpTopic.EditSessionQuarter:
+            <p>The quarter of the year the project capture session took place</p>
+            break;
+        case Enumerations.HelpTopic.EditBPOTransfers:
+            <p>The number of times the lesson was transferred to a Business Process Owner</p>
+            break;
+        case Enumerations.HelpTopic.EditTimesSentBPO:
+            <p>The number of times the lesson was sent to the Business Process Owner (includes lessons sent back after clarification and transfers)</p>
+            break;
+        case Enumerations.HelpTopic.EditDateLastSentBPO:
+            <p>The date and time the lesson was last sent to the BPO to start the validation process</p>
+            break;
+        case Enumerations.HelpTopic.EditDateLastSentClarification:
+            <p>If the lesson was sent for clarification, the date and time it was sent</p>
+            break;
+        case Enumerations.HelpTopic.EditTimesSentClarification:
+            <p>Number of times the lesson was sent back to the Lessons Learned Coordinator for additional information</p>
+            break;
+        default:
+            break;
+    }
+    }
+
+</div>
+

@@ -1,0 +1,201 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js" type="text/javascript"></script>
+}   
+
+@model AdminViewData
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Web.Helpers
+@using Suncor.LessonsLearnedMP.Framework
+@using Suncor.LessonsLearnedMP.Web.ViewData
+
+@{
+    ViewBag.Title = "Administration";
+
+    ApplicationContext appContext = new ApplicationContext(Html.GetDistributedCache());
+    var autoSendNotificationTypes = new[] { 
+        new { id = (int)Enumerations.NotificationEmailType.N8_BPOUnvalidatedReminder, Name = "To BPO After X days Lesson Not Closed " },
+        new { id = (int)Enumerations.NotificationEmailType.N9_LLCDraftReminder, Name = "To LLC After X Days Lesson Not Submitted" }
+    };
+
+    var primaryAdmin = appContext.Admins.Where(x => x.Primary).FirstOrDefault();
+    var primaryAdminName = "";
+    if (primaryAdmin != null)
+    {
+        primaryAdminName = Utils.FormatUserNameForDisplay(primaryAdmin);
+    }
+}
+
+@section Navigation
+{
+   @Html.Partial("Navigation", Enumerations.NavigationPage.Administration)
+}
+
+@section Actions
+{
+    @{
+        List<SaveActionOption> options = new List<SaveActionOption>();
+
+        options.Add(new SaveActionOption { ButtonType = Suncor.LessonsLearnedMP.Web.ViewData.ButtonType.MainDropDown, ButtonText = "Save Changes", IconClass = "sprite-disk" });
+
+        @Html.Partial("ActionButton", options)
+    }
+}
+
+@Html.Script(Enumerations.Css.JquerySelectMenu)
+@Html.Script(Enumerations.JavaScript.JquerySelectMenu)
+@Html.Script(Enumerations.JavaScript.LessonsLearnedAdmin)
+
+<div id="EditAdmin">
+    @{
+        ///TODO: CMANUH - Html.EnableClientValidation();
+        using (Html.BeginForm("Save", "Admin", FormMethod.Post, new { id = "AdminForm", name = "AdminForm" }))
+        {
+            <div class="dark-theme">
+                <div class="label header">
+                    <label>
+                        <span class="float-left reference-list-name">Reference List Administration</span>
+                    </label>
+                </div>
+        
+                <div class="clear"></div>
+        
+                <div class="section ui-widget ui-widget-content ui-corner-all">
+                    <div class="section-item">
+                
+                        <div class="ddl" style="width:432px;">
+                            @Html.DropDownListFor(x => x.EditReferenceType, new SelectList(appContext.ReferenceTypes.Where(x => !x.System), "Id", "Name", Model.EditReferenceType), new { @class = "use-select-menu" })
+                        </div>
+                    </div>
+
+                    <div class="clear"></div>
+                </div>
+            
+                <div class="clear"></div>
+        
+                <div id="EditReferenceValueTarget" class="section ui-widget ui-widget-content ui-corner-all" style="height:230px">
+                    @Html.Partial("EditReferenceValues", Model)
+                </div>
+
+                <div class="clear  clearfix"></div>
+
+                <div class="label header">
+                    <label>
+                        <span class="reference-list-name">BPO Discipline User Administration</span>
+                    </label>
+                </div>
+        
+                <div class="clear"></div>
+        
+                <div class="section ui-widget ui-widget-content ui-corner-all">
+                    <div class="section-item">
+                
+                        <div class="ddl" style="width:432px;">
+                            @Html.DropDownListFor(x => x.EditingDisciplineUsersReferenceValue, new SelectList(appContext.Disciplines.Where(x => x.Enabled).ToList().ToDisplayList(), "Id", "Name", Model.EditingDisciplineUsersReferenceValue), new { @class = "use-select-menu clearfix" })
+                        </div>
+                    </div>
+
+                    <div class="clear"></div>
+                </div>
+            
+                <div class="clear"></div>
+        
+                <div id="EditBpoUsersTarget" class="section ui-widget ui-widget-content ui-corner-all" style="height:167px">
+                    @Html.Partial("EditBpoUsers", Model)
+                </div>
+        
+                <div class="clear clearfix"></div>
+        
+                <div>
+                    <div class="label header">
+                        <label>
+                            <span class="reference-list-name">Notification Administration</span>
+                        </label>
+                    </div>
+        
+                    <div class="clear"></div>
+        
+                    <div id="EditNotificationsTarget" class="section ui-widget ui-widget-content ui-corner-all" style="height:71px;">
+                        <div class="label float-left">
+                            <label>
+                                <span class="float-left">Set Primary Administrator</span>
+                            </label>
+                        </div>
+
+                        <div class="clear"></div>
+
+                        <div class="section-item float-left">
+                
+                            <div class="ddl float-left">
+                                @Html.DropDownList("AdminUsers", new SelectList(appContext.Admins, "Sid", "Name"), new { @class = "use-select-menu" })
+                            </div>
+
+                            <div class="single-button lr-list-left-outer-button ui-widget ui-state-default ui-corner-all float-left">
+                                <ul>
+                                    <li title="Assign Primary Administrator" class="button-top"><span id="AssignPrimaryAdministrator" data-inputId="@Html.GetControlId(x => x.AddReferenceValue)" data-listId="@Html.GetControlId(x => x.ReferenceValueEnabled)" data-disabledListId="@Html.GetControlId(x => x.ReferenceValueDisabled)" class="web-sprite sprite-award-star-gold-3 clickable multi-add clearfix float-left"></span></li>
+                                </ul>
+                            </div>
+
+                            <div class="ddl float-left">
+                                <input class="float-left ui-widget ui-state-default ui-corner-all" id="PrimaryAdminName" name="PrimaryAdminName" type="text" readonly="true" value="@primaryAdminName" />
+                            </div>
+
+                            <div class="clear"></div>
+                            <div style="margin-left: 456px;">@Html.ValidationMessageFor(x => x.PrimaryAdminUser)</div>
+                            @Html.HiddenFor(x => x.PrimaryAdminUser)
+
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+        
+                    <div class="clear clearfix"></div>
+                </div>
+            </div>
+        }
+
+        using (Html.BeginForm("SendNotifications", "Admin", FormMethod.Post, new { id = "AdminSendNotificationsForm", name = "AdminSendNotificationsForm" }))
+        {
+            <div class="dark-theme">
+                <div class="section ui-widget ui-widget-content ui-corner-all" style="height:89px;">
+            
+                    <div class="label float-left">
+                        <label>
+                            <span class="float-left">Auto-Notification Days</span>
+                        </label>
+                    </div>
+
+                    <div class="clear"></div>
+
+                    <div class="section-item float-left">
+                
+                        <div class="ddl float-left" style="width:303px">
+                            <label style="color:Black">Email Type</label>
+                            @Html.DropDownList("EmailNotificationType", new SelectList(autoSendNotificationTypes, "Id", "Name"), new { @class = "use-select-menu" })
+                        </div>
+
+                        <div class="ddl float-left" style="width:65px">
+                            <label style="color:Black">X Days</label>
+                            @Html.TextBoxFor(x => x.NotificationDays, new { @class = "ui-widget ui-state-default ui-corner-all" })
+                            @Html.ValidationMessageFor(x => x.NotificationDays)
+                        </div>
+
+                        <div class="ddl float-left">
+                            <button type="button" id="SendMail" class='button display-none' style="margin-left:15px; margin-top:14px;">
+                                <span class="web-sprite sprite-mail-send combo-button-sprite"></span>&nbsp;Send
+                            </button>
+                        </div>
+
+                    </div>
+                <div class="clear"></div>
+
+                </div>
+            </div>
+
+            <div class="clear"></div>
+        
+        }
+
+    }
+
+</div>

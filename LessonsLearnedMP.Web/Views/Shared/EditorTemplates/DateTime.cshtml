@@ -1,0 +1,46 @@
+﻿@model DateTime?
+@using Microsoft.AspNetCore.Routing;
+
+@{
+	//string id = ViewData.TemplateInfo.HtmlFieldPrefix.Replace(".", "_");
+	//string name = ViewData.TemplateInfo.HtmlFieldPrefix;
+	string date = Model.HasValue ? Model.Value.ToString("yyyy-MM-dd") : "";
+	string time = Model.HasValue ? Model.Value.ToShortTimeString() : "";
+
+	bool readOnly = false;
+	bool datepicker = true;
+
+	if (ViewData.ContainsKey("ReadOnly"))
+	{
+		readOnly = (bool)ViewData["ReadOnly"];
+	}
+
+	if (ViewData.ContainsKey("DatePicker"))
+	{
+		datepicker = (bool)ViewData["DatePicker"];
+	}
+
+	var validationAttributes = new Dictionary<string, string>();// Html.GetUnobtrusiveValidationAttributes("");
+}
+
+<div class="datepicker-control">
+    @if (readOnly)
+    {
+        @Html.TextBox("", date,
+            new RouteValueDictionary(validationAttributes) 
+            { 
+                { "class", "float-left ui-widget ui-state-disabled ui-corner-all" }, 
+                { "readonly", "readonly" } 
+            }
+        )
+    }
+    else
+    {
+        @Html.TextBox("", date,
+            new RouteValueDictionary(validationAttributes) 
+            { 
+                { "class", "float-left ui-widget ui-state-default ui-corner-all " + (datepicker ? "datepicker" : "") }
+            }
+        )
+    }
+</div>

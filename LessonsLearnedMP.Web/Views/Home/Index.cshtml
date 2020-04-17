@@ -1,0 +1,38 @@
+﻿@*//VS jQuery Docs, used only for design time *@
+@if (false)
+{
+    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1-vsdoc.js" type="text/javascript"></script>
+}   
+
+@using Suncor.LessonsLearnedMP.Web.Common
+@using Suncor.LessonsLearnedMP.Framework
+
+@{
+    ViewBag.Title = "Home";
+    UserSessionContext userSessionContext = new UserSessionContext(this.ViewContext.HttpContext);
+}
+
+@section Navigation
+{
+    @Html.Partial("Navigation", Enumerations.NavigationPage.Home)
+}
+
+<div id="HomePageContent">
+    @switch ((Enumerations.Role)userSessionContext.CurrentUser.RoleId)
+    {
+        case Enumerations.Role.User:
+            @Html.Partial("HomePageUser")
+       break;
+        case Enumerations.Role.Coordinator:
+            @Html.Partial("HomePageCoordinator")
+       break;
+        case Enumerations.Role.BPO:
+            @Html.Partial("HomePageBPO")
+       break;
+        case Enumerations.Role.Administrator:
+            @Html.Partial("HomePageAdministrator")
+        break;
+        default:
+        break;
+    }
+</div>
